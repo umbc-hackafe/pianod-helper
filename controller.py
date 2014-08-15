@@ -10,6 +10,7 @@ class Controller:
 
         self.lock = Lock()
 
+        self.stopped = True
         self.first_login()
 
     def first_login(self):
@@ -46,9 +47,17 @@ class Controller:
         with self.lock:
             self.conn.write("AUTOTUNE FOR {}".format(" ".join(users)).encode('ascii') + b'\n')
 
+    def stop(self, now=False):
+        with self.lock:
+            self.conn.write("STOP{}".format(" NOW" if now else "").encode('ascii') + b'\n')
+            self.stopped = True
+
     def login(self, user):
         with self.lock:
             self.conn.write("AUTOTUNE CONSIDER {}".format(user).encode('ascii') + b'\n')
+            if self.stopped:
+                self.conn.write("PLAY MIX".encode('ascii') + b'\n')
+                self.stopped = False
 
     def logout(self, user):
         with self.lock:

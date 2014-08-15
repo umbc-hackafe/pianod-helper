@@ -55,6 +55,9 @@ class Pinger:
                     self.controller.logout(user)
                 self.statuses[user] = result
 
+                if True not in self.statuses.values():
+                    self.controller.stop()
+
     def start(self):
         self.thread = Thread(target=self.run, name="pinger", daemon=True)
         self.thread.start()
