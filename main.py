@@ -12,7 +12,9 @@ def get_pianod():
     with app.app_context():
         pianod = getattr(g, '_pianod', None)
         if pianod is None:
-            pianod = controller.Controller(host=config.pianod_host, port=config.pianod_port)
+            pianod = controller.Controller(host=config.pianod_host, port=config.pianod_port,
+                                           username=config.pianod_user if hasattr(config, 'pianod_user') else "admin",
+                                           password=config.pianod_pass if hasattr(config, 'pianod_pass') else "admin")
         return pianod
 
 def get_finder():

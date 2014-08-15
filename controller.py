@@ -1,10 +1,10 @@
 import telnetlib
 class Controller:
-    def __init__(self, host, port):
+    def __init__(self, host, port, username, password):
         self.host = host
         self.port = port
         self.conn = telnetlib.Telnet(host, port)
-        self.conn.write("USER admin admin".encode('ascii') + b'\n')
+        self.conn.write("USER {} {}".format(username, password).encode('ascii') + b'\n')
         self.conn.write("AUTOTUNE MODE FLAG".encode('ascii') + b'\n')
 
     def check_users(self, users):
