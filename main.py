@@ -74,4 +74,5 @@ def teardown_pinger(exception):
 
 if __name__ == "__main__":
     get_pinger().start()
+    get_pianod().check_users(get_finder().all_users())
     app.run()

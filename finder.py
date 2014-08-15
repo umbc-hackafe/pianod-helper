@@ -24,6 +24,9 @@ class Finder:
     def user_hosts(self, user):
         return self.users[user]["hosts"]
 
+    def all_users(self):
+        return self.users.keys()
+
     def check_type(self, user):
         return "any" if (user not in self.users or "check" not in self.users[user]) else self.users[user]["check"]
 
