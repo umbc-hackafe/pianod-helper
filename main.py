@@ -50,7 +50,8 @@ def rate(rating):
     user = thefinder.find_user(ip)
 
     if user:
-        pianod.rate(rating.upper(), user)
+        # FIXME assume user and password are same
+        pianod.rate(rating.upper(), user, user)
         return "OK"
     else:
         return "No user registered at your IP"
