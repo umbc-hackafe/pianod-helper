@@ -19,7 +19,7 @@ def get_finder():
     with app.app_context():
         thefinder = getattr(g, '_finder', None)
         if thefinder is None:
-            thefinder = finder.Finder("users.json")
+            thefinder = finder.Finder(config.user_file if hasattr(config, 'user_file') else 'users.json')
         return thefinder
 
 pianod = LocalProxy(get_pianod)

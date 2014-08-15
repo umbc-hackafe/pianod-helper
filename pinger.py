@@ -1,5 +1,6 @@
 import finder
 import controller
+import config
 from threading import Thread
 from time import sleep
 from os import devnull
@@ -66,7 +67,11 @@ class Pinger:
                 if not self.keepgoing:
                     break
                 self.ping_user(user)
-            sleep(5)
+
+            if hasattr(config, 'ping_sleep'):
+                sleep(config.ping_sleep)
+            else:
+                sleep(60)
 
     def stop(self):
         self.keepgoing = False
