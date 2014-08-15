@@ -23,6 +23,8 @@ class Pinger:
                 result = True
             except CalledProcessError:
                 result = False
+            except:
+                result = False
         return result
 
     def ping_user(self, user):
