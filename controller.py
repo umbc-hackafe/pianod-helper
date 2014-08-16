@@ -2,6 +2,8 @@ import config
 import telnetlib
 from threading import Lock
 
+g_conn = None
+
 class Controller:
     def __init__(self, host=config.values['pianod']['host'],
                  port=config.values['pianod']['port'],
@@ -19,7 +21,12 @@ class Controller:
 
     def first_login(self):
         with self.lock:
-            self.conn = telnetlib.Telnet(self.host, self.port)
+            global g_conn
+            if g_conn:
+                self.conn = g_conn
+            else:
+                self.conn = telnetlib.Telnet(self.host, self.port)
+                g_conn = self.conn
             self.conn.write("USER {} {}".format(self.user, self.pw).encode('ascii') + b'\n')
             self.conn.write("AUTOTUNE MODE FLAG".encode('ascii') + b'\n')
 
@@ -72,3 +79,6 @@ class Controller:
         with self.lock:
             self.conn.write("QUIT".encode('ascii') + b'\n')
             self.conn.close()
+            self.conn = None
+            global g_conn
+            g_conn = None

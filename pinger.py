@@ -12,6 +12,7 @@ class Pinger:
         self.controller = thecontroller
         self.statuses = {}
         self.keepgoing = True
+        self.stopped = False
 
         for user in config.values['users']:
             self.statuses[user] = None
