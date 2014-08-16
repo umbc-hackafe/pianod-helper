@@ -1,0 +1,23 @@
+#!/bin/bash
+DIR="./qrcodes"
+URLS=("rate/good" "rate/bad" "control/playpause" "control/play" "control/pause" "control/stop" "control/skip")
+
+if [ "$#" -gt 0 ]; then
+    HOSTNAME=$1
+else
+    echo -n "hostname:port: "
+    read -r HOSTNAME
+fi
+
+mkdir -p $DIR
+rm -f $DIR/*.png
+
+for URL in "${URLS[@]}"; do
+    FILE=$(echo "$URL" | tr / -)
+    TITLE=$(echo "$URL" | tr / " ")
+    qrencode -o "$DIR/$FILE.png" -s 8 "http://$HOSTNAME/$URL"
+    convert "$DIR/$FILE.png" -pointsize 24 -gravity north -annotate 0 "$TITLE" "$DIR/$FILE.png" || echo "Not adding caption, imagemagick not found"
+done
+
+SIZE=$(file *.png | awk '{print $5}' | head -n 1)
+montage -tile 2x -geometry ${SIZE}x${SIZE} $DIR/*.png $DIR/all.png || echo "Not creating montage. imagemagick not found"
