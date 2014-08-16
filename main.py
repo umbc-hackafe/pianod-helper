@@ -4,7 +4,9 @@ from werkzeug.local import LocalProxy
 import finder
 import controller
 import pinger
-import config
+import signal
+import sys
+from time import sleep
 
 app = Flask(__name__)
 
@@ -33,6 +35,12 @@ def get_pinger():
         return thepinger
 
 thepinger = LocalProxy(get_pinger)
+
+def signal_handler(signal, frame):
+    print("Caught signal. Exiting...")
+    pianod.close()
+    thepinger.stop()
+    sys.exit(0)
 
 @app.route('/')
 def main():
@@ -74,6 +82,7 @@ def teardown_pinger(exception):
         thepinger.save()
 
 if __name__ == "__main__":
-    get_pianod().check_users(get_finder().all_users())
+    signal.signal(signal.SIGINT, signal_handler)
+    get_pianod().check_users()
     get_pinger().start()
     app.run()
