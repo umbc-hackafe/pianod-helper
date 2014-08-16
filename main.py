@@ -12,16 +12,14 @@ def get_pianod():
     with app.app_context():
         pianod = getattr(g, '_pianod', None)
         if pianod is None:
-            pianod = controller.Controller(host=config.pianod_host, port=config.pianod_port,
-                                           username=config.pianod_user if hasattr(config, 'pianod_user') else "admin",
-                                           password=config.pianod_pass if hasattr(config, 'pianod_pass') else "admin")
+            pianod = controller.Controller()
         return pianod
 
 def get_finder():
     with app.app_context():
         thefinder = getattr(g, '_finder', None)
         if thefinder is None:
-            thefinder = finder.Finder(config.user_file if hasattr(config, 'user_file') else 'users.json')
+            thefinder = finder.Finder()
         return thefinder
 
 pianod = LocalProxy(get_pianod)

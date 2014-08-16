@@ -1,8 +1,12 @@
+import config
 import telnetlib
 from threading import Lock
 
 class Controller:
-    def __init__(self, host, port, username, password):
+    def __init__(self, host=config.values['pianod']['host'],
+                 port=config.values['pianod']['port'],
+                 username=config.values['pianod']['user'],
+                 password=config.values['pianod']['pass']):
         self.host = host
         self.port = port
         self.user = username
@@ -19,7 +23,8 @@ class Controller:
             self.conn.write("USER {} {}".format(self.user, self.pw).encode('ascii') + b'\n')
             self.conn.write("AUTOTUNE MODE FLAG".encode('ascii') + b'\n')
 
-    def check_users(self, users):
+    def check_users(self):
+        users = config.usernames()
         users_found = set()
 
         with self.lock:

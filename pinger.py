@@ -13,7 +13,7 @@ class Pinger:
         self.statuses = {}
         self.keepgoing = True
 
-        for user in self.finder.users:
+        for user in config.values['users']:
             self.statuses[user] = None
 
     def ping_host(self, host):
@@ -67,16 +67,13 @@ class Pinger:
     def run(self):
         # start thread
         while self.keepgoing:
-            print("Starting ping...")
-            for user in self.finder.users:
+            for user in config.usernames():
                 if not self.keepgoing:
                     break
                 self.ping_user(user)
 
-            if hasattr(config, 'ping_sleep'):
-                sleep(config.ping_sleep)
-            else:
-                sleep(60)
+            sleep(config.values["ping"]["sleep"])
+        self.stopped = True
 
     def stop(self):
         self.keepgoing = False

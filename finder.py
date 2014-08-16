@@ -1,34 +1,21 @@
-import json
-
-class InvalidConfigurationException(Exception):
-    pass
+import config
 
 class Finder:
-    def __init__(self, filename):
-        self.filename = filename
-        with open(filename, 'r') as datafile:
-            data = json.load(datafile)
-        if data and "users" in data:
-            self.users = data["users"]
-            self.hosts = {}
-            # make a reverse map
-            for user in self.users:
-                for host in self.users[user]["hosts"]:
-                    self.hosts[host] = user
-        else:
-            raise InvalidConfigurationException()
+    def __init__(self):
+        self.hosts = {}
+        # make a reverse map
+        for user in config.values['users']:
+            for host in config.values['users'][user]['hosts']:
+                self.hosts[host] = user
 
     def find_user(self, ip):
         return self.hosts[ip] if ip in self.hosts else None
 
     def user_hosts(self, user):
-        return self.users[user]["hosts"]
-
-    def all_users(self):
-        return self.users.keys()
+        return config.values['users'][user]['hosts']
 
     def check_type(self, user):
-        return "any" if (user not in self.users or "check" not in self.users[user]) else self.users[user]["check"]
+        return "any" if (user not in config.values['users'] or "check" not in config.values['users'][user]) else config.values['users'][user]['check']
 
     def save(self):
         with open(self.filename, 'w') as datafile:
