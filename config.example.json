@@ -1,0 +1,27 @@
+{
+    "pianod": {
+	"host": "localhost",
+	"port": 4445,
+	"user": "admin",
+	"pass": "admin"
+    },
+
+    "ping": {
+	"sleep": 60
+    },
+
+    "users": {
+	"foo": {
+	    "hosts": [
+                "foo", "foo-phone",
+		"192.168.0.9", "192.168.0.23" ],
+	    "check": "any"
+	},
+	"bar": {
+	    "hosts": [
+                "bar-laptop", "bar-phone",
+                "bar-tablet" ],
+	    "check": "all"
+	}
+    }
+}
