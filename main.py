@@ -85,4 +85,4 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     get_pianod().check_users()
     get_pinger().start()
-    app.run()
+    app.run(host='0.0.0.0')
