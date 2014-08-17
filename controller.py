@@ -27,69 +27,95 @@ class Controller:
             else:
                 self.conn = telnetlib.Telnet(self.host, self.port)
                 g_conn = self.conn
-            self.conn.write("USER {} {}".format(self.user, self.pw).encode('ascii') + b'\n')
-            self.conn.write("AUTOTUNE MODE FLAG".encode('ascii') + b'\n')
+            try:
+                self.conn.write("USER {} {}".format(self.user, self.pw).encode('ascii') + b'\n')
+                self.conn.write("AUTOTUNE MODE FLAG".encode('ascii') + b'\n')
+                return True
+            except BrokenPipeError:
+                return False
+
+    def cmd(self, command, lock=True):
+        success = False
+        while not success:
+            try:
+                if lock:
+                    with self.lock:
+                        self.conn.write(command.encode('ascii') + b'\n')
+                else:
+                    self.conn.write(command.encode('ascii') + b'\n')
+                success = True
+            except BrokenPipeError:
+                self.close()
+                while not self.first_login():
+                    pass
 
     def check_users(self):
-        users = config.usernames()
-        users_found = set()
+        success = False
+        while not success:
+            users = config.usernames()
+            users_found = set()
 
-        with self.lock:
-            # throw away old data jic
-            self.conn.read_eager()
-            self.conn.write("USERS LIST".encode('ascii') + b'\n')
-            user_results = self.conn.read_until(b"204")
-            for line in user_results.decode('ascii').splitlines():
-                if line.startswith("111"):
-                    user = line.split()[2]
-                    users_found.add(user)
+            try:
+                with self.lock:
+                    # throw away old data jic
+                    self.conn.read_eager()
+                    self.cmd("USERS LIST", lock=False)
+                    user_results = self.conn.read_until(b"204")
+                    for line in user_results.decode('ascii').splitlines():
+                        if line.startswith("111"):
+                            user = line.split()[2]
+                            users_found.add(user)
+                success = True
 
-            for user in set(users) - users_found:
-                self.conn.write("CREATE USER {} {}".format(user, user).encode('ascii') + b'\n')
-                self.conn.write("GRANT influence TO {}".format(user).encode('ascii') + b'\n')
+            except BrokenPipeError:
+                self.close()
+                while not self.first_login():
+                    pass
+
+        for user in set(users) - users_found:
+            self.cmd("CREATE USER {} {}".format(user, user))
+            self.cmd("GRANT influence TO {}".format(user))
+
         self.users_created = True
 
     def rate(self, mode, user, pw):
-        with self.lock:
-            self.conn.write("AS USER {} {} RATE {}".format(user, pw, mode).encode('ascii') + b'\n')
+        self.cmd("AS USER {} {} RATE {}".format(user, pw, mode))
 
     def online_users(self, users):
-        with self.lock:
-            self.conn.write("AUTOTUNE FOR {}".format(" ".join(users)).encode('ascii') + b'\n')
+        self.cmd("AUTOTUNE FOR {}".format(" ".join(users)))
 
     def stop(self, now=False):
-        with self.lock:
-            self.conn.write("STOP{}".format(" NOW" if now else "").encode('ascii') + b'\n')
-            self.stopped = True
+        self.cmd("STOP{}".format(" NOW" if now else ""))
+        self.stopped = True
 
     def login(self, user):
-        with self.lock:
-            self.conn.write("AUTOTUNE CONSIDER {}".format(user).encode('ascii') + b'\n')
-            if self.stopped:
-                self.conn.write("PLAY MIX".encode('ascii') + b'\n')
-                self.stopped = False
+        self.cmd("AUTOTUNE CONSIDER {}".format(user))
+        if self.stopped:
+            self.cmd("PLAY MIX")
+            self.stopped = False
 
     def pause(self, toggle=False):
-        with self.lock:
-            self.conn.write(("PLAYPAUSE" if toggle else "PAUSE").encode('ascii') + b'\n')
+        self.cmd("PLAYPAUSE" if toggle else "PAUSE")
 
     def play(self):
-        with self.lock:
-            self.conn.write("PLAY".encode('ascii') + b'\n')
+        if self.stopped:
+            self.cmd("PLAY MIX")
+        self.cmd("PLAY")
 
     def skip(self):
-        with self.lock:
-            self.conn.write("SKIP".encode('ascii') + b'\n')
+        self.cmd("SKIP")
 
 
     def logout(self, user):
-        with self.lock:
-            self.conn.write("AUTOTUNE DISREGARD {}".format(user).encode('ascii') + b'\n')
+        self.cmd("AUTOTUNE DISREGARD {}".format(user))
 
     def close(self):
         with self.lock:
-            self.conn.write("QUIT".encode('ascii') + b'\n')
-            self.conn.close()
+            try:
+                self.conn.write("QUIT".encode('ascii') + b'\n')
+                self.conn.close()
+            except BrokenPipeError:
+                pass
             self.conn = None
             global g_conn
             g_conn = None
