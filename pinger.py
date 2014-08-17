@@ -36,13 +36,10 @@ class Pinger:
 
             for host in self.finder.user_hosts(user):
                 result = self.ping_host(host)
-                print("{} is {}".format(host, "up" if result else "down"))
                 if result:
                     hosts_up += 1
                     if check_type == "any":
                         break
-
-            print("{} has {} hosts up".format(user, hosts_up))
 
             if check_type == "all":
                 result = hosts_up == len(self.finder.user_hosts(user))

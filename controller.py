@@ -43,10 +43,8 @@ class Controller:
                 if line.startswith("111"):
                     user = line.split()[2]
                     users_found.add(user)
-                    print("Found user {}".format(user))
 
             for user in set(users) - users_found:
-                print("Creating user {}".format(user))
                 self.conn.write("CREATE USER {} {}".format(user, user).encode('ascii') + b'\n')
                 self.conn.write("GRANT influence TO {}".format(user).encode('ascii') + b'\n')
         self.users_created = True
