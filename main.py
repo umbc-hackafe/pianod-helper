@@ -62,28 +62,28 @@ def rate(rating):
         return "No user registered at your IP"
         abort(403)
 
-@app.route('/skip')
+@app.route('/control/skip')
 def skip():
     pianod.skip()
     return "OK"
 
-@app.route('/pause')
+@app.route('/control/pause')
 def pause():
     pianod.pause()
     return "OK"
 
-@app.route('/play')
+@app.route('/control/play')
 def play():
     pianod.play()
     return "OK"
 
-@app.route('/stop/<now>')
-@app.route('/stop')
-def stop(now=True):
+@app.route('/control/stop/<now>')
+@app.route('/control/stop')
+def stop(now=False):
     pianod.stop(now)
     return "OK"
 
-@app.route('/playpause')
+@app.route('/control/playpause')
 def playpause():
     pianod.pause(toggle=True)
     return "OK"
