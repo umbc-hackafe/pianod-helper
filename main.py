@@ -56,12 +56,37 @@ def rate(rating):
     user = thefinder.find_user(ip)
 
     if user:
-        # FIXME assume user and password are same
         pianod.rate(rating.upper(), user, user)
         return "OK"
     else:
         return "No user registered at your IP"
         abort(403)
+
+@app.route('/skip')
+def skip():
+    pianod.skip()
+    return "OK"
+
+@app.route('/pause')
+def pause():
+    pianod.pause()
+    return "OK"
+
+@app.route('/play')
+def play():
+    pianod.play()
+    return "OK"
+
+@app.route('/stop/<now>')
+@app.route('/stop')
+def stop(now=True):
+    pianod.stop(now)
+    return "OK"
+
+@app.route('/playpause')
+def playpause():
+    pianod.pause(toggle=True)
+    return "OK"
 
 @app.teardown_appcontext
 def teardown_finder(exception):

@@ -69,6 +69,19 @@ class Controller:
                 self.conn.write("PLAY MIX".encode('ascii') + b'\n')
                 self.stopped = False
 
+    def pause(self, toggle=False):
+        with self.lock:
+            self.conn.write(("PLAYPAUSE" if toggle else "PAUSE").encode('ascii') + b'\n')
+
+    def play(self):
+        with self.lock:
+            self.conn.write("PLAY".encode('ascii') + b'\n')
+
+    def skip(self):
+        with self.lock:
+            self.conn.write("SKIP".encode('ascii') + b'\n')
+
+
     def logout(self, user):
         with self.lock:
             self.conn.write("AUTOTUNE DISREGARD {}".format(user).encode('ascii') + b'\n')
